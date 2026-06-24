@@ -28,6 +28,8 @@ public class CupomRepositoryEmMemoria implements ICupomRepository {
                 LocalDateTime.of(2026, 5, 1, 6, 0)));
         cuponsDisponiveis.put("BLACK50", new CupomDescontoPedido("BLACK50", 50.0, LocalDateTime.of(2026, 4, 28, 0, 0),
                 LocalDateTime.of(2026, 4, 28, 23, 59)));
+        cuponsDisponiveis.put("JUNHO10", new CupomDescontoPedido("JUNHO10", 10.0, LocalDateTime.of(2026, 6, 1, 0, 0),
+                LocalDateTime.of(2026, 6, 30, 23, 59)));
     }
 
     public void adicionarCupom(CupomDescontoPedido cupom) {

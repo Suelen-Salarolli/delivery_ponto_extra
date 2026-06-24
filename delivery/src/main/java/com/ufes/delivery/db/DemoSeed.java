@@ -21,6 +21,8 @@ public final class DemoSeed {
 
     public static void semearPedidosSeVazio() {
         try (Connection conn = ConexaoDB.getConexao()) {
+            semearProdutosSeVazio(conn);
+
             // Verifica se ja existem pedidos
             try (Statement st = conn.createStatement();
                  ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM pedidos")) {
@@ -50,6 +52,35 @@ public final class DemoSeed {
         } catch (Exception e) {
             System.err.println("AVISO: falha ao semear dados demo - " + e.getMessage());
         }
+    }
+
+    private static void semearProdutosSeVazio(Connection conn) throws Exception {
+        try (Statement st = conn.createStatement();
+             ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM produtos")) {
+            if (rs.next() && rs.getInt(1) > 0) return;
+        }
+
+        String sql = """
+            INSERT INTO produtos (codigo, nome, categoria, preco_unitario, estoque_atual)
+            VALUES (?, ?, ?, ?, ?)
+        """;
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            inserirProdutoDemo(ps, 101, "Pizza Calabresa", "Alimentacao", "49.90", 20);
+            inserirProdutoDemo(ps, 102, "Hamburguer Artesanal", "Alimentacao", "34.90", 18);
+            inserirProdutoDemo(ps, 201, "Refrigerante 2L", "Alimentacao", "12.00", 30);
+            inserirProdutoDemo(ps, 301, "Brownie", "Alimentacao", "14.00", 15);
+            ps.executeBatch();
+        }
+    }
+
+    private static void inserirProdutoDemo(PreparedStatement ps, int codigo, String nome,
+                                           String categoria, String preco, int estoque) throws Exception {
+        ps.setInt(1, codigo);
+        ps.setString(2, nome);
+        ps.setString(3, categoria);
+        ps.setString(4, preco);
+        ps.setInt(5, estoque);
+        ps.addBatch();
     }
 
     private static int obterOuCriarClienteDemo(Connection conn) throws Exception {

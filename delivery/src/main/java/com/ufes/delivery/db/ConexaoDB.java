@@ -12,19 +12,20 @@ public class ConexaoDB {
     private ConexaoDB() {}
 
     /**
-     * Abre uma conexao nova e independente. Cada chamador e responsavel por
-     * fechar a conexao recebida (use try-with-resources).
+     * Abre uma conexao independente. O chamador DEVE fechar via try-with-resources.
      *
-     * AIDEV-NOTE: abandonamos o singleton de conexao porque DAOs que precisam
-     * de transacao chamavam setAutoCommit(false) na conexao global, criando
-     * risco de corrupcao de estado em operacoes concorrentes ou aninhadas.
-     * SQLite serializa escritas por arquivo, entao multiplas conexoes sao seguras.
+     * AIDEV-NOTE: PRAGMA busy_timeout instrui o SQLite a aguardar ate 5s antes de
+     * lancar SQLITE_BUSY, resolvendo o erro "database file is locked" que ocorria
+     * quando duas conexoes concorrentes tentavam escrever (ex: salvar produto enquanto
+     * o painel consultava pedidos).
+     * WAL (Write-Ahead Log) permite leituras e escritas concorrentes sem bloqueio total.
      */
     public static Connection getConexao() throws SQLException {
         Connection conn = DriverManager.getConnection(URL);
-        try (Statement stmt = conn.createStatement()) {
-            stmt.execute("PRAGMA foreign_keys = ON");
-            stmt.execute("PRAGMA journal_mode = WAL");
+        try (Statement st = conn.createStatement()) {
+            st.execute("PRAGMA journal_mode = WAL");
+            st.execute("PRAGMA busy_timeout = 5000");
+            st.execute("PRAGMA foreign_keys = ON");
         }
         return conn;
     }
@@ -90,7 +91,6 @@ public class ConexaoDB {
                 )
             """);
 
-            // US08 — movimentacoes de estoque (Entrada e Ajuste; Saida apenas automatica)
             stmt.executeUpdate("""
                 CREATE TABLE IF NOT EXISTS estoque_movimentacoes (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -108,7 +108,6 @@ public class ConexaoDB {
                 )
             """);
 
-            // US04/US09/US10 — pedidos completos
             stmt.executeUpdate("""
                 CREATE TABLE IF NOT EXISTS pedidos (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -129,7 +128,6 @@ public class ConexaoDB {
                 )
             """);
 
-            // US09 — itens do pedido
             stmt.executeUpdate("""
                 CREATE TABLE IF NOT EXISTS pedido_itens (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -144,13 +142,12 @@ public class ConexaoDB {
                 )
             """);
 
-            // US11 — tentativas de pagamento simulado
             stmt.executeUpdate("""
                 CREATE TABLE IF NOT EXISTS pagamentos (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     pedido_id INTEGER NOT NULL,
                     forma_pagamento TEXT NOT NULL,
-                    resultado TEXT NOT NULL CHECK(resultado IN ('Aprovado','Reprovado')),
+                    resultado TEXT NOT NULL CHECK(resultado IN ('APROVADO','REPROVADO')),
                     identificador_transacao TEXT,
                     valor_pago TEXT,
                     prazo_estimado_entrega TEXT,

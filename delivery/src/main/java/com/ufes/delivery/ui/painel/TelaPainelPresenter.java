@@ -1,6 +1,7 @@
 package com.ufes.delivery.ui.painel;
 
 import com.ufes.delivery.configuracao.ConfiguracaoService;
+import com.ufes.delivery.factory.PedidoModuleFactory;
 import com.ufes.delivery.model.Sessao;
 import com.ufes.delivery.model.Usuario;
 import com.ufes.delivery.model.cadastro.PedidoResumo;
@@ -20,7 +21,10 @@ import com.ufes.delivery.dao.MovimentacaoEstoqueDAO;
 import com.ufes.delivery.service.EstoqueService;
 import com.ufes.delivery.ui.estoque.TelaMovimentacaoEstoque;
 import com.ufes.delivery.ui.estoque.TelaMovimentacaoEstoquePresenter;
+import com.ufes.delivery.ui.pedido.TelaPedido;
+import com.ufes.delivery.ui.pedido.TelaPedidoPresenter;
 import com.ufes.delivery.auditoria.IAuditoriaService;
+import com.ufes.delivery.service.PagamentoService;
 import com.ufes.delivery.ui.usuario.TelaUsuarios;
 import com.ufes.delivery.ui.usuario.TelaUsuariosPresenter;
 
@@ -83,7 +87,7 @@ public class TelaPainelPresenter {
         view.getMenuBuscarProdutos().addActionListener(e -> abrirBuscarProdutos());
         view.getMenuNovoProduto().addActionListener(e -> abrirNovoProduto());
         view.getMenuUsuarios().addActionListener(e -> abrirUsuarios());
-        view.getMenuNovoPedido().addActionListener(e -> avisarProximaFase("Novo pedido (US09)"));
+        view.getMenuNovoPedido().addActionListener(e -> abrirNovoPedido());
         view.getMenuMovimentacaoEstoque().addActionListener(e -> abrirMovimentacaoEstoque());
         view.getBtnVisualizar().addActionListener(e -> visualizarPedido());
     }
@@ -122,6 +126,19 @@ public class TelaPainelPresenter {
     private void abrirNovoProduto() {
         TelaProduto tela = new TelaProduto(view);
         new TelaProdutoPresenter(tela, produtoService, null);
+        tela.setVisible(true);
+    }
+
+    private void abrirNovoPedido() {
+        TelaPedido tela = new TelaPedido(view);
+        new TelaPedidoPresenter(
+            tela,
+            clienteService,
+            produtoService,
+            PedidoModuleFactory.criarPedidoService(auditoria),
+            PedidoModuleFactory.criarPagamentoService(auditoria),
+            this::atualizarPainel
+        );
         tela.setVisible(true);
     }
 
@@ -170,9 +187,4 @@ public class TelaPainelPresenter {
         tela.setVisible(true);
     }
 
-    private void avisarProximaFase(String funcionalidade) {
-        JOptionPane.showMessageDialog(view,
-            funcionalidade + " sera implementada na proxima fase.",
-            "Em construcao", JOptionPane.INFORMATION_MESSAGE);
-    }
 }
