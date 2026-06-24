@@ -22,8 +22,10 @@ public class ConexaoDB {
      */
     public static Connection getConexao() throws SQLException {
         Connection conn = DriverManager.getConnection(URL);
-        conn.createStatement().execute("PRAGMA foreign_keys = ON");
-        conn.createStatement().execute("PRAGMA journal_mode = WAL");
+        try (Statement stmt = conn.createStatement()) {
+            stmt.execute("PRAGMA foreign_keys = ON");
+            stmt.execute("PRAGMA journal_mode = WAL");
+        }
         return conn;
     }
 

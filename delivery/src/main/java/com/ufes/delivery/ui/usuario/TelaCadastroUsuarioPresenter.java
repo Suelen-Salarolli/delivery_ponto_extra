@@ -1,6 +1,7 @@
 package com.ufes.delivery.ui.usuario;
 
 import com.ufes.delivery.service.UsuarioService;
+import javax.swing.JOptionPane;
 
 public class TelaCadastroUsuarioPresenter {
 
@@ -40,8 +41,13 @@ public class TelaCadastroUsuarioPresenter {
 
         try {
             usuarioService.cadastrar(nome, username, senha);
-            view.setMensagemSucesso("Usuario cadastrado com sucesso!");
-            view.getBtnConfirmar().setEnabled(false);
+            JOptionPane.showMessageDialog(
+                view,
+                "Usuario cadastrado com sucesso!",
+                "Cadastro realizado",
+                JOptionPane.INFORMATION_MESSAGE
+            );
+            view.dispose();
         } catch (IllegalArgumentException ex) {
             view.setMensagemErro(ex.getMessage());
         } catch (Exception ex) {
