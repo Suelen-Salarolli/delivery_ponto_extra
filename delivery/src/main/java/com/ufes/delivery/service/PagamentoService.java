@@ -78,6 +78,7 @@ public class PagamentoService {
             LocalDateTime prazo = simulador.gerarPrazoEntrega(agora);
 
             // Padrao State: valida e aplica a transicao do ciclo do pedido.
+            String estadoAnterior = pedido.getEstado().getDescricao();
             pedido.aprovarPagamento();
 
             resultado = new ResultadoPagamento(
@@ -95,6 +96,10 @@ public class PagamentoService {
             auditoria.registrar(usuario, "PAGAMENTO_APROVADO",
                 "pedido:" + pedido.getCodigo(), "Aprovado",
                 "Forma: " + forma + " | Txn: " + txn);
+
+            // Log transition of state
+            auditoria.registrar(usuario, "TRANSICAO_ESTADO", "pedido:" + pedido.getCodigo(),
+                "Sucesso", "De: " + estadoAnterior + " | Para: " + pedido.getEstado().getDescricao());
 
             // Auditoria da baixa de estoque por item
             for (PedidoItem item : itens) {

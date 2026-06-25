@@ -2,6 +2,7 @@ package com.ufes.delivery;
 
 import com.ufes.delivery.auditoria.AuditoriaDBService;
 import com.ufes.delivery.auditoria.IAuditoriaService;
+import com.ufes.delivery.auditoria.AuditoriaManager;
 import com.ufes.delivery.dao.ClienteDAO;
 import com.ufes.delivery.dao.PedidoResumoDAO;
 import com.ufes.delivery.dao.ProdutoDAO;
@@ -35,7 +36,9 @@ public class Main {
                 DemoSeed.semearPedidosSeVazio();
 
                 // Dependências (composicao manual — sem container de DI).
-                IAuditoriaService auditoria = new AuditoriaDBService();
+                AuditoriaManager auditoriaManager = new AuditoriaManager();
+                auditoriaManager.registrarObservador(new AuditoriaDBService());
+                IAuditoriaService auditoria = auditoriaManager;
                 UsuarioDAO usuarioDAO = new UsuarioDAO();
                 AutenticacaoService autenticacaoService = new AutenticacaoService(usuarioDAO, auditoria);
                 UsuarioService usuarioService = new UsuarioService(usuarioDAO, auditoria);

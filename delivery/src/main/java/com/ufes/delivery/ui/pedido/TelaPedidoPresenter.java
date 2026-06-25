@@ -11,6 +11,8 @@ import com.ufes.delivery.service.PagamentoService;
 import com.ufes.delivery.service.PedidoService;
 import com.ufes.delivery.service.ProdutoService;
 import com.ufes.delivery.ui.pagamento.TelaPagamentoPresenter;
+import com.ufes.delivery.ui.cliente.TelaCliente;
+import com.ufes.delivery.ui.cliente.TelaClientePresenter;
 
 import javax.swing.*;
 import javax.swing.event.TableModelEvent;
@@ -43,6 +45,7 @@ public class TelaPedidoPresenter {
     // Pedido persistido apos primeiro clique em Pagar (evita salvar duplicado)
     private PedidoCadastro pedidoSalvo;
     private boolean atualizandoTabela;
+    private Cliente clienteCompleto;
 
     public TelaPedidoPresenter(TelaPedido view,
                                 ClienteService clienteService,
@@ -63,6 +66,7 @@ public class TelaPedidoPresenter {
 
     private void vincularEventos() {
         view.getComboClientes().addActionListener(e -> carregarEnderecosCliente());
+        view.getBtnNovoCliente().addActionListener(e -> abrirNovoCliente());
         view.getBtnAdicionarItem().addActionListener(e -> adicionarItem());
         view.getMenuExcluirItem().addActionListener(e -> removerItem());
         view.getCampoCupom().addActionListener(e -> recalcularTotais());
@@ -93,14 +97,15 @@ public class TelaPedidoPresenter {
     private void carregarEnderecosCliente() {
         Cliente selecionado = view.getClienteSelecionado();
         if (selecionado == null) {
+            clienteCompleto = null;
             view.carregarEnderecos(List.of());
             return;
         }
         try {
-            Cliente completo = clienteService.buscarPorId(selecionado.getId())
+            clienteCompleto = clienteService.buscarPorId(selecionado.getId())
                 .orElse(selecionado);
-            view.carregarEnderecos(completo.getEnderecos());
-            Endereco padrao = completo.getEnderecoPadrao();
+            view.carregarEnderecos(clienteCompleto.getEnderecos());
+            Endereco padrao = clienteCompleto.getEnderecoPadrao();
             if (padrao != null) view.selecionarEndereco(padrao);
         } catch (Exception ex) {
             view.setMensagem("Endereco: erro ao carregar enderecos do cliente");
@@ -147,7 +152,7 @@ public class TelaPedidoPresenter {
     private void recalcularTotais() {
         try {
             PedidoCadastro pedido = pedidoService.montarPedido(
-                view.getClienteSelecionado(),
+                clienteCompleto,
                 view.getEnderecoSelecionado(),
                 view.getItens(),
                 view.getCupom(),
@@ -171,7 +176,7 @@ public class TelaPedidoPresenter {
         if (pedidoSalvo == null) {
             try {
                 pedidoSalvo = pedidoService.salvarNovoPedido(
-                    view.getClienteSelecionado(),
+                    clienteCompleto,
                     view.getEnderecoSelecionado(),
                     view.getItens(),
                     view.getCupom(),
@@ -199,6 +204,35 @@ public class TelaPedidoPresenter {
             if (aoFinalizar != null) aoFinalizar.run();
         }
         // Se reprovado: permanece na tela com pedido preservado para nova tentativa
+    }
+
+    private void abrirNovoCliente() {
+        Frame owner = (Frame) SwingUtilities.getWindowAncestor(view);
+        TelaCliente modal = new TelaCliente(owner);
+        new TelaClientePresenter(modal, clienteService, null);
+        modal.setVisible(true);
+
+        // After dialog is closed, reload clients list and select the newest client
+        try {
+            List<Cliente> todos = clienteService.listarTodos();
+            view.carregarClientes(todos);
+            if (!todos.isEmpty()) {
+                Cliente maisRecente = todos.stream()
+                    .max((c1, c2) -> Integer.compare(c1.getId(), c2.getId()))
+                    .orElse(null);
+                if (maisRecente != null) {
+                    for (int i = 0; i < view.getComboClientes().getItemCount(); i++) {
+                        Cliente item = view.getComboClientes().getItemAt(i);
+                        if (item.getId() == maisRecente.getId()) {
+                            view.getComboClientes().setSelectedIndex(i);
+                            break;
+                        }
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            view.setMensagem("Erro ao recarregar clientes: " + ex.getMessage());
+        }
     }
 
     private void cancelar() {

@@ -51,6 +51,7 @@ public class TelaPedido extends JDialog {
     private JButton btnAdicionarItem;
     private JButton btnSalvar;
     private JButton btnCancelar;
+    private JButton btnNovoCliente;
     private JMenuItem menuExcluirItem;
     private final List<PedidoItem> itens = new ArrayList<>();
 
@@ -85,34 +86,44 @@ public class TelaPedido extends JDialog {
         configurarRenderers();
         spinnerQuantidade = new JSpinner(new SpinnerNumberModel(1, 1, 999, 1));
         btnAdicionarItem = new JButton("Adicionar item");
+        btnNovoCliente = new JButton("Novo cliente");
         campoCupom = new JTextField(12);
 
-        g.gridx = 0; g.gridy = 0; g.weightx = 0;
+        // Row 0
+        g.gridx = 0; g.gridy = 0; g.weightx = 0; g.gridwidth = 1;
         painel.add(new JLabel("Cliente:"), g);
-        g.gridx = 1; g.weightx = 1;
+        g.gridx = 1; g.weightx = 1; g.gridwidth = 3;
         painel.add(comboClientes, g);
+        g.gridx = 4; g.weightx = 0; g.gridwidth = 1;
+        painel.add(btnNovoCliente, g);
 
-        g.gridx = 0; g.gridy = 1; g.weightx = 0;
+        // Row 1
+        g.gridx = 0; g.gridy = 1; g.weightx = 0; g.gridwidth = 1;
         painel.add(new JLabel("Endereco:"), g);
-        g.gridx = 1; g.weightx = 1;
+        g.gridx = 1; g.weightx = 1; g.gridwidth = 4;
         painel.add(comboEnderecos, g);
 
-        g.gridx = 0; g.gridy = 2; g.weightx = 0;
+        // Row 2
+        g.gridx = 0; g.gridy = 2; g.weightx = 0; g.gridwidth = 1;
         painel.add(new JLabel("Produto:"), g);
-        g.gridx = 1; g.weightx = 1;
+        g.gridx = 1; g.weightx = 1; g.gridwidth = 1;
         painel.add(comboProdutos, g);
 
-        g.gridx = 2; g.gridy = 2; g.weightx = 0;
+        g.gridx = 2; g.gridy = 2; g.weightx = 0; g.gridwidth = 1;
         painel.add(new JLabel("Qtd:"), g);
-        g.gridx = 3;
+        g.gridx = 3; g.weightx = 0; g.gridwidth = 1;
         painel.add(spinnerQuantidade, g);
-        g.gridx = 4;
+        g.gridx = 4; g.weightx = 0; g.gridwidth = 1;
         painel.add(btnAdicionarItem, g);
 
-        g.gridx = 0; g.gridy = 3;
+        // Row 3
+        g.gridx = 0; g.gridy = 3; g.weightx = 0; g.gridwidth = 1;
         painel.add(new JLabel("Cupom:"), g);
-        g.gridx = 1;
+        g.gridx = 1; g.weightx = 1; g.gridwidth = 4;
         painel.add(campoCupom, g);
+
+        // Reset gridwidth for any other components
+        g.gridwidth = 1;
 
         return painel;
     }
@@ -226,6 +237,7 @@ public class TelaPedido extends JDialog {
     public JButton getBtnAdicionarItem() { return btnAdicionarItem; }
     public JButton getBtnPagar() { return btnSalvar; }
     public JButton getBtnCancelar() { return btnCancelar; }
+    public JButton getBtnNovoCliente() { return btnNovoCliente; }
     public JComboBox<Cliente> getComboClientes() { return comboClientes; }
     public JTextField getCampoCupom() { return campoCupom; }
     public JMenuItem getMenuExcluirItem() { return menuExcluirItem; }
