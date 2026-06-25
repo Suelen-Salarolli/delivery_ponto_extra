@@ -1,7 +1,9 @@
 package com.ufes.delivery.service;
 
 import com.ufes.delivery.auditoria.IAuditoriaService;
+import com.ufes.delivery.configuracao.ConfiguracaoService;
 import com.ufes.delivery.dao.PedidoDAO;
+import com.ufes.delivery.desconto.entrega.CalculadoraDescontoEntregaService;
 import com.ufes.delivery.model.CupomDescontoPedido;
 import com.ufes.delivery.model.Sessao;
 import com.ufes.delivery.model.cadastro.Cliente;
@@ -22,13 +24,16 @@ public class PedidoService {
 
     private final PedidoDAO pedidoDAO;
     private final ICupomRepository cupomRepository;
+    private final CalculadoraDescontoEntregaService calculadoraEntrega;
     private final IAuditoriaService auditoria;
 
     public PedidoService(PedidoDAO pedidoDAO,
                          ICupomRepository cupomRepository,
+                         CalculadoraDescontoEntregaService calculadoraEntrega,
                          IAuditoriaService auditoria) {
         this.pedidoDAO = pedidoDAO;
         this.cupomRepository = cupomRepository;
+        this.calculadoraEntrega = calculadoraEntrega;
         this.auditoria = auditoria;
     }
 
@@ -51,7 +56,8 @@ public class PedidoService {
         itens.forEach(pedido::adicionarItem);
         LocalDate data = pedido.getDataPedido();
         aplicarCupom(pedido, cupomCodigo, data.atTime(12, 0));
-        recalcularTotais(pedido);
+        aplicarTaxaEntrega(pedido);
+        pedido.recalcularTotais();
         return pedido;
     }
 
@@ -108,16 +114,15 @@ public class PedidoService {
         pedido.setDescontoItens(desconto);
     }
 
-    private void recalcularTotais(PedidoCadastro pedido) {
-        BigDecimal subtotal = pedido.getSubtotalItens();
-        BigDecimal total = subtotal
-            .subtract(pedido.getDescontoItens())
-            .subtract(pedido.getDescontoEntrega())
-            .add(pedido.getTaxaEntrega())
+    /**
+     * Aplica a taxa de entrega base e o desconto de entrega calculado pelas
+     * estrategias (Strategy). O total e recalculado pelo proprio agregado.
+     */
+    private void aplicarTaxaEntrega(PedidoCadastro pedido) {
+        BigDecimal taxaBase = BigDecimal.valueOf(ConfiguracaoService.getTaxaEntregaPadrao())
             .setScale(2, RoundingMode.HALF_UP);
-        if (total.signum() < 0) {
-            total = BigDecimal.ZERO.setScale(2);
-        }
-        pedido.setValorTotal(total);
+        BigDecimal descontoEntrega = calculadoraEntrega.calcularDescontoEntrega(pedido, taxaBase);
+        pedido.setTaxaEntrega(taxaBase);
+        pedido.setDescontoEntrega(descontoEntrega);
     }
 }

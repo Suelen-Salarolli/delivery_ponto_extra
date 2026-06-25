@@ -153,14 +153,14 @@ public class TelaPedidoPresenter {
                 view.getCupom(),
                 ConfiguracaoService.getDataOperacao()
             );
-            view.setTotais(pedido.getSubtotalItens(),
-                pedido.getDescontoItens(), pedido.getValorTotal());
+            view.setTotais(pedido.getSubtotalItens(), pedido.getDescontoItens(),
+                pedido.getTaxaEntregaFinal(), pedido.getValorTotal());
         } catch (Exception ex) {
             // Silencioso durante montagem — erros aparecem so ao clicar Pagar
             BigDecimal sub = view.getItens().stream()
                 .map(PedidoItem::getSubtotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-            view.setTotais(sub, BigDecimal.ZERO, sub);
+            view.setTotais(sub, BigDecimal.ZERO, BigDecimal.ZERO, sub);
         }
     }
 

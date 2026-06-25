@@ -77,14 +77,17 @@ public class PagamentoService {
             String txn = "TXN-" + agora.format(FMT_TXN) + "-" + pedido.getCodigo();
             LocalDateTime prazo = simulador.gerarPrazoEntrega(agora);
 
+            // Padrao State: valida e aplica a transicao do ciclo do pedido.
+            pedido.aprovarPagamento();
+
             resultado = new ResultadoPagamento(
                 pedido.getId(), pedido.getCodigo(),
                 ResultadoPagamento.Situacao.APROVADO,
                 forma, txn, pedido.getValorTotal(), prazo, agora);
 
             try {
-                // Transacao atomica: pagamento + baixa estoque + estado Aguardando entrega
-                pagamentoDAO.confirmarAprovado(resultado, itens);
+                // Transacao atomica: pagamento + baixa estoque + novo estado do pedido
+                pagamentoDAO.confirmarAprovado(resultado, itens, pedido.getEstado());
             } catch (Exception e) {
                 throw new RuntimeException("Erro ao confirmar pagamento: " + e.getMessage(), e);
             }

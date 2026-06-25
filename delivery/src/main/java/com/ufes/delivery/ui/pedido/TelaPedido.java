@@ -45,6 +45,7 @@ public class TelaPedido extends JDialog {
     private DefaultTableModel modeloItens;
     private JLabel lblSubtotal;
     private JLabel lblDesconto;
+    private JLabel lblTaxaEntrega;
     private JLabel lblTotal;
     private JLabel lblMensagem;
     private JButton btnAdicionarItem;
@@ -180,9 +181,11 @@ public class TelaPedido extends JDialog {
         JPanel totais = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 6));
         lblSubtotal = new JLabel("Subtotal: R$ 0,00");
         lblDesconto = new JLabel("Desconto: R$ 0,00");
+        lblTaxaEntrega = new JLabel("Taxa de entrega: R$ 0,00");
         lblTotal = new JLabel("Total: R$ 0,00");
         totais.add(lblSubtotal);
         totais.add(lblDesconto);
+        totais.add(lblTaxaEntrega);
         totais.add(lblTotal);
 
         JPanel acoes = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 6));
@@ -255,9 +258,11 @@ public class TelaPedido extends JDialog {
         }
     }
 
-    public void setTotais(BigDecimal subtotal, BigDecimal desconto, BigDecimal total) {
+    public void setTotais(BigDecimal subtotal, BigDecimal desconto,
+                          BigDecimal taxaEntregaFinal, BigDecimal total) {
         lblSubtotal.setText("Subtotal: " + MoedaUtil.formatar(subtotal));
         lblDesconto.setText("Desconto: " + MoedaUtil.formatar(desconto));
+        lblTaxaEntrega.setText("Taxa de entrega: " + MoedaUtil.formatar(taxaEntregaFinal));
         lblTotal.setText("Total: " + MoedaUtil.formatar(total));
     }
 

@@ -3,6 +3,7 @@ package com.ufes.delivery.factory;
 import com.ufes.delivery.auditoria.IAuditoriaService;
 import com.ufes.delivery.dao.PagamentoDAO;
 import com.ufes.delivery.dao.PedidoDAO;
+import com.ufes.delivery.desconto.entrega.CalculadoraDescontoEntregaService;
 import com.ufes.delivery.repository.CupomRepositoryEmMemoria;
 import com.ufes.delivery.service.PagamentoService;
 import com.ufes.delivery.service.PedidoService;
@@ -23,6 +24,7 @@ public final class PedidoModuleFactory {
         return new PedidoService(
             new PedidoDAO(),
             new CupomRepositoryEmMemoria(),
+            new CalculadoraDescontoEntregaService(),
             auditoria
         );
     }

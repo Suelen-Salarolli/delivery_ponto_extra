@@ -28,7 +28,8 @@ public class PagamentoDAO {
      * e muda estado do pedido para Aguardando entrega — tudo atomico.
      */
     public void confirmarAprovado(ResultadoPagamento resultado,
-                                   java.util.List<com.ufes.delivery.model.pedido.PedidoItem> itens)
+                                   java.util.List<com.ufes.delivery.model.pedido.PedidoItem> itens,
+                                   EstadoPedido novoEstado)
             throws SQLException {
 
         try (Connection conn = ConexaoDB.getConexao()) {
@@ -42,9 +43,8 @@ public class PagamentoDAO {
                     baixarEstoque(conn, item.getProdutoId(), item.getQuantidade());
                 }
 
-                // 3. Muda estado do pedido
-                atualizarEstadoPedido(conn, resultado.getPedidoId(),
-                    EstadoPedido.AGUARDANDO_ENTREGA);
+                // 3. Persiste o novo estado definido pelo padrao State
+                atualizarEstadoPedido(conn, resultado.getPedidoId(), novoEstado);
 
                 conn.commit();
             } catch (SQLException e) {
