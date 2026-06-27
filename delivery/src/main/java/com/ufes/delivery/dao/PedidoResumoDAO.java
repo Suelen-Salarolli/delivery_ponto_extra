@@ -16,7 +16,7 @@ import java.util.List;
 public class PedidoResumoDAO {
 
     public List<PedidoResumo> listarPorDataPedido(LocalDate data) throws SQLException {
-        String sql = "SELECT * FROM pedidos WHERE data_pedido = ? ORDER BY codigo";
+        String sql = "SELECT * FROM pedidos WHERE date(data_pedido) = ? ORDER BY codigo";
         List<PedidoResumo> lista = new ArrayList<>();
         try (Connection conn = ConexaoDB.getConexao();
              PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -29,7 +29,7 @@ public class PedidoResumoDAO {
     }
 
     public int contarEntreguesPorConclusao(LocalDate dataOperacao) throws SQLException {
-        String sql = "SELECT COUNT(*) FROM pedidos WHERE estado = ? AND data_conclusao = ?";
+        String sql = "SELECT COUNT(*) FROM pedidos WHERE estado = ? AND date(data_conclusao) = ?";
         try (Connection conn = ConexaoDB.getConexao();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, EstadoPedido.ENTREGUE.getDescricao());
@@ -50,10 +50,17 @@ public class PedidoResumoDAO {
 
     private PedidoResumo mapear(ResultSet rs) throws SQLException {
         String conclusaoTxt = rs.getString("data_conclusao");
+        if (conclusaoTxt != null && conclusaoTxt.contains(" ")) {
+            conclusaoTxt = conclusaoTxt.split(" ")[0];
+        }
+        String dataPedidoTxt = rs.getString("data_pedido");
+        if (dataPedidoTxt != null && dataPedidoTxt.contains(" ")) {
+            dataPedidoTxt = dataPedidoTxt.split(" ")[0];
+        }
         return new PedidoResumo(
             rs.getInt("codigo"),
             rs.getString("cliente_nome"),
-            LocalDate.parse(rs.getString("data_pedido")),
+            LocalDate.parse(dataPedidoTxt),
             conclusaoTxt == null ? null : LocalDate.parse(conclusaoTxt),
             EstadoPedido.fromDescricao(rs.getString("estado")),
             new BigDecimal(rs.getString("valor_total"))

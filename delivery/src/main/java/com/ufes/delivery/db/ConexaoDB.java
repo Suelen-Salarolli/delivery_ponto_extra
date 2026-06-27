@@ -45,18 +45,6 @@ public class ConexaoDB {
             """);
 
             stmt.executeUpdate("""
-                CREATE TABLE IF NOT EXISTS auditoria (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    usuario TEXT NOT NULL,
-                    data_hora TEXT NOT NULL,
-                    operacao TEXT NOT NULL,
-                    recurso TEXT NOT NULL,
-                    resultado TEXT NOT NULL,
-                    justificativa TEXT
-                )
-            """);
-
-            stmt.executeUpdate("""
                 CREATE TABLE IF NOT EXISTS produtos (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     codigo INTEGER NOT NULL UNIQUE,

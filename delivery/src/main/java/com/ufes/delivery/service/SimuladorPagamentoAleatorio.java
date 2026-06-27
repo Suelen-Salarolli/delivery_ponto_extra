@@ -10,7 +10,7 @@ import java.util.Random;
 public class SimuladorPagamentoAleatorio implements ISimuladorPagamento {
 
     private static final String[] FORMAS = {
-        "Open Finance", "PIX chave", "PIX QR Code", "Cartao de credito"
+        "Open Finance", "PIX chave", "PIX QR Code", "Cartao de crédito"
     };
 
     private final Random random;

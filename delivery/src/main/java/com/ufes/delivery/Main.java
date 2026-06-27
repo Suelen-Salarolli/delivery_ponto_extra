@@ -1,6 +1,5 @@
 package com.ufes.delivery;
 
-import com.ufes.delivery.auditoria.AuditoriaDBService;
 import com.ufes.delivery.auditoria.IAuditoriaService;
 import com.ufes.delivery.auditoria.AuditoriaManager;
 import com.ufes.delivery.dao.ClienteDAO;
@@ -37,7 +36,6 @@ public class Main {
 
                 // Dependências (composicao manual — sem container de DI).
                 AuditoriaManager auditoriaManager = new AuditoriaManager();
-                auditoriaManager.registrarObservador(new AuditoriaDBService());
                 IAuditoriaService auditoria = auditoriaManager;
                 UsuarioDAO usuarioDAO = new UsuarioDAO();
                 AutenticacaoService autenticacaoService = new AutenticacaoService(usuarioDAO, auditoria);

@@ -7,6 +7,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 /**
  * Seed idempotente de dados demo para o painel (US04).
@@ -23,27 +25,56 @@ public final class DemoSeed {
         try (Connection conn = ConexaoDB.getConexao()) {
             semearProdutosSeVazio(conn);
 
-            // Verifica se ja existem pedidos
-            try (Statement st = conn.createStatement();
-                 ResultSet rs = st.executeQuery("SELECT COUNT(*) FROM pedidos")) {
-                if (rs.next() && rs.getInt(1) > 0) return;
-            }
-
             conn.setAutoCommit(false);
             try {
+                // Remove old demo orders (1001-1008) and their potential dependencies
+                try (PreparedStatement ps = conn.prepareStatement(
+                        "DELETE FROM pagamentos WHERE pedido_id IN (SELECT id FROM pedidos WHERE codigo BETWEEN 1001 AND 1008)")) {
+                    ps.executeUpdate();
+                }
+                try (PreparedStatement ps = conn.prepareStatement(
+                        "DELETE FROM pedido_itens WHERE pedido_id IN (SELECT id FROM pedidos WHERE codigo BETWEEN 1001 AND 1008)")) {
+                    ps.executeUpdate();
+                }
+                try (PreparedStatement ps = conn.prepareStatement(
+                        "DELETE FROM pedidos WHERE codigo BETWEEN 1001 AND 1008")) {
+                    ps.executeUpdate();
+                }
+
                 // Cria cliente demo (se nao existir)
                 int clienteId = obterOuCriarClienteDemo(conn);
                 int enderecoId = obterOuCriarEnderecoDemo(conn, clienteId);
 
-                LocalDate hoje = ConfiguracaoService.getDataOperacao();
-                inserir(conn, 1001, "Fulano de Tal",   clienteId, enderecoId, hoje, null, EstadoPedido.NOVO,                "45.00");
-                inserir(conn, 1002, "Maria Souza",      clienteId, enderecoId, hoje, null, EstadoPedido.NOVO,                "62.50");
-                inserir(conn, 1003, "Joao Pereira",     clienteId, enderecoId, hoje, null, EstadoPedido.AGUARDANDO_PAGAMENTO,"118.90");
-                inserir(conn, 1004, "Ana Lima",         clienteId, enderecoId, hoje, null, EstadoPedido.EM_PREPARO,          "37.00");
-                inserir(conn, 1005, "Carlos Dias",      clienteId, enderecoId, hoje, null, EstadoPedido.AGUARDANDO_ENTREGA,  "89.30");
-                inserir(conn, 1006, "Beatriz Alves",    clienteId, enderecoId, hoje, null, EstadoPedido.EM_TRANSITO,         "140.30");
-                inserir(conn, 1007, "Diego Castro",     clienteId, enderecoId, hoje, hoje, EstadoPedido.ENTREGUE,            "75.80");
-                inserir(conn, 1008, "Elaine Rocha",     clienteId, enderecoId, hoje, hoje, EstadoPedido.ENTREGUE,            "54.20");
+                LocalDateTime agora = LocalDateTime.now();
+                int totalMinutos = agora.getHour() * 60 + agora.getMinute();
+                LocalDate hoje = agora.toLocalDate();
+
+                // Generate timestamps distributed up to the current elapsed minutes of the day (never in the future)
+                String[] tempos = new String[8];
+                for (int i = 0; i < 8; i++) {
+                    int minutos = 0;
+                    if (totalMinutos > 0) {
+                        minutos = (int) (totalMinutos * (0.05 + 0.90 * (i / 7.0)));
+                        if (minutos >= totalMinutos) {
+                            minutos = totalMinutos - 1;
+                        }
+                        if (minutos < 0) {
+                            minutos = 0;
+                        }
+                    }
+                    LocalTime hora = LocalTime.of(minutos / 60, minutos % 60);
+                    tempos[i] = hoje.toString() + " " + String.format("%02d:%02d:00", hora.getHour(), hora.getMinute());
+                }
+
+                inserir(conn, 1001, "Fulano de Tal",   clienteId, enderecoId, tempos[0], null, EstadoPedido.NOVO,                "45.00");
+                inserir(conn, 1002, "Maria Souza",      clienteId, enderecoId, tempos[1], null, EstadoPedido.NOVO,                "62.50");
+                inserir(conn, 1003, "Joao Pereira",     clienteId, enderecoId, tempos[2], null, EstadoPedido.AGUARDANDO_PAGAMENTO,"118.90");
+                inserir(conn, 1004, "Ana Lima",         clienteId, enderecoId, tempos[3], null, EstadoPedido.EM_PREPARO,          "37.00");
+                inserir(conn, 1005, "Carlos Dias",      clienteId, enderecoId, tempos[4], null, EstadoPedido.AGUARDANDO_ENTREGA,  "89.30");
+                inserir(conn, 1006, "Beatriz Alves",    clienteId, enderecoId, tempos[5], null, EstadoPedido.EM_TRANSITO,         "140.30");
+                // Diego and Elaine are Entregue, concluding at their creation time or slightly after
+                inserir(conn, 1007, "Diego Castro",     clienteId, enderecoId, tempos[6], tempos[6], EstadoPedido.ENTREGUE,            "75.80");
+                inserir(conn, 1008, "Elaine Rocha",     clienteId, enderecoId, tempos[7], tempos[7], EstadoPedido.ENTREGUE,            "54.20");
                 conn.commit();
             } catch (Exception e) {
                 conn.rollback();
@@ -133,7 +164,7 @@ public final class DemoSeed {
 
     private static void inserir(Connection conn, int codigo, String clienteNome,
                                 int clienteId, int enderecoId,
-                                LocalDate dataPedido, LocalDate dataConclusao,
+                                String dataPedido, String dataConclusao,
                                 EstadoPedido estado, String valor) throws Exception {
         String sql = """
             INSERT INTO pedidos
@@ -146,8 +177,8 @@ public final class DemoSeed {
             ps.setInt(2, clienteId);
             ps.setString(3, clienteNome);
             ps.setInt(4, enderecoId);
-            ps.setString(5, dataPedido.toString());
-            ps.setString(6, dataConclusao == null ? null : dataConclusao.toString());
+            ps.setString(5, dataPedido);
+            ps.setString(6, dataConclusao);
             ps.setString(7, estado.getDescricao());
             ps.setString(8, valor);
             ps.executeUpdate();
