@@ -1,10 +1,10 @@
-# 📦 Delivery — POC (Proof of Concept)
+#  Delivery — POC (Proof of Concept)
 
 Sistema desktop de gerenciamento de pedidos, clientes, produtos e estoque para operações de delivery.  
 
 ---
 
-## 🚀 Como Compilar e Executar
+##  Como Compilar e Executar
 
 ### Pré-requisitos
 
@@ -35,7 +35,7 @@ Na primeira execução, o sistema:
 
 ---
 
-## 📋 Índice
+##  Índice
 
 - [Visão Geral](#-visão-geral)
 - [Tecnologias](#-tecnologias)
@@ -51,7 +51,7 @@ Na primeira execução, o sistema:
 
 ---
 
-## 🎯 Visão Geral
+##  Visão Geral
 
 O sistema implementa o fluxo operacional completo de um serviço de delivery:
 
@@ -65,7 +65,7 @@ O sistema implementa o fluxo operacional completo de um serviço de delivery:
 
 ---
 
-## 🛠 Tecnologias
+##  Tecnologias
 
 | Tecnologia | Versão | Uso |
 |---|---|---|
@@ -79,7 +79,7 @@ O sistema implementa o fluxo operacional completo de um serviço de delivery:
 
 ---
 
-## 🏗 Arquitetura
+##  Arquitetura
 
 O sistema segue a arquitetura **MVP Passive View** com separação em camadas:
 
@@ -111,7 +111,7 @@ O sistema segue a arquitetura **MVP Passive View** com separação em camadas:
 
 ---
 
-## 📁 Estrutura de Pacotes
+##  Estrutura de Pacotes
 
 ```
 com.ufes.delivery
@@ -234,7 +234,7 @@ com.ufes.delivery
 
 ---
 
-## 📖 Funcionalidades (User Stories)
+##  Funcionalidades (User Stories)
 
 ### US01 — Autenticar Usuário e Iniciar Sessão
 - Campos: Nome de usuário (minúsculas + algarismos, 3-30 caracteres) e Senha (8-64 caracteres, mascarada)
@@ -321,7 +321,7 @@ com.ufes.delivery
 
 ---
 
-## 🧩 Padrões de Projeto
+##  Padrões de Projeto
 
 | Padrão | Tipo | Onde é Aplicado |
 |---|---|---|
@@ -335,7 +335,7 @@ com.ufes.delivery
 
 ---
 
-## 📐 Modelo de Domínio
+##  Modelo de Domínio
 
 ### Perfis de Usuário
 | Perfil | Permissões |
@@ -370,7 +370,7 @@ Alimentação, Educação, Lazer, Entretenimento, Saúde, Vestuário, Outros
 
 ---
 
-## 📏 Regras Transversais
+##  Regras Transversais
 
 | Regra | Implementação |
 |---|---|
@@ -385,7 +385,7 @@ Alimentação, Educação, Lazer, Entretenimento, Saúde, Vestuário, Outros
 
 ---
 
-## 📝 Auditoria (CR2)
+##  Auditoria (CR2)
 
 A auditoria utiliza a **biblioteca externa SistemaLogAuditoria** distribuída via JitPack (baseline do CR2 — Log de Auditoria).
 
@@ -425,7 +425,7 @@ Cada evento contém:
 
 ---
 
-## 🗃 Dados de Demonstração
+##  Dados de Demonstração
 
 Na primeira execução, o `DemoSeed` cria automaticamente:
 - **1 cliente demo** com endereço
@@ -452,7 +452,7 @@ Na primeira execução, o `DemoSeed` cria automaticamente:
 
 ---
 
-## 🗄 Banco de Dados
+##  Banco de Dados
 
 O SQLite (`delivery.db`) é criado automaticamente e contém as seguintes tabelas:
 
@@ -474,9 +474,9 @@ O SQLite (`delivery.db`) é criado automaticamente e contém as seguintes tabela
 
 ---
 
-## 👨‍💻 Autores
+##  Autores
 
-Projeto desenvolvido como atividade acadêmica na UFES.
+SUELEN SALAROLLI BISI , MARIA CLARA GUELER FEITANI e HENRIQUE QUEIROZ TEIXEIRA
 
 ---
 
